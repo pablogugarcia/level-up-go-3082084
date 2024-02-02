@@ -4,9 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"text/tabwriter"
+	"time"
 )
+
+
 
 const path = "songs.json"
 
@@ -17,9 +21,40 @@ type Song struct {
 	PlayCount int64  `json:"play_count"`
 }
 
+func totalSongsInAlbums(albums [][]Song) int {
+	var total int
+
+	for _, a := range albums {
+		total += len(a)
+	}
+	return total
+}
+
+func removeAlbum(a [][]Song, s int) [][]Song {
+    return append(a[:s], a[s+1:]...)
+}
+
+func removeSong(song []Song, s int) []Song {
+    return append(song[:s], song[s+1:]...)
+}
+
 // makePlaylist makes the merged sorted list of songs
 func makePlaylist(albums [][]Song) []Song {
-	panic("NOT IMPLEMENTED")
+	rand.Seed(time.Now().UnixNano())
+	var totalSongs = totalSongsInAlbums(albums)
+	result := make([]Song, 0)
+	for totalSongs > 0 {
+		a := rand.Intn(len(albums))
+		s := rand.Intn(len(albums[a]))
+		result = append(result, albums[a][s])
+		if len(albums[a]) == 1 {
+			albums = removeAlbum(albums, a)
+		}else {
+			albums[a] = removeSong(albums[a], s)
+		}
+		totalSongs--
+ 	}
+	return result
 }
 
 func main() {
