@@ -16,17 +16,29 @@ var operators = map[string]func(x, y float64) float64{
 }
 
 // parseOperand parses a string to a float64
-func parseOperand(op string) float64 {
-	parsedOp, _ := strconv.ParseFloat(op, 64)
-	return parsedOp
+func parseOperand(op string) (float64, error) {
+	parsedOp, err := strconv.ParseFloat(op, 64)
+	if err != nil {
+		return .0, err
+	}
+	return parsedOp, nil
 }
 
 // calculate returns the result of a 2 operand mathematical expression
 func calculate(expr string) float64 {
 	ops := strings.Fields(expr)
-	left := parseOperand(ops[0])
-	right := parseOperand(ops[2])
-	f := operators[ops[1]]
+	left, err := parseOperand(ops[0])
+	if err != nil {
+		log.Fatal("Error while parsing frist operand")
+	}
+	right, err := parseOperand(ops[2])
+	if err != nil {
+		log.Fatal("Error while parsing sec operand")
+	}
+	f, ok := operators[ops[1]]
+	if !ok {
+		log.Fatalf("Error parsing the operation type. Unknown: %s operator", ops[1])
+	}
 	result := f(left, right)
 	return result
 }
